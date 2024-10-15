@@ -6,6 +6,7 @@ const { body, param, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 var router = express.Router();
 const { verifyToken } = require("../middlewares/authMiddleware");
+const Product = require("../models/Product");
 const Category = require("../models/Category");
 
 // Set storage engine for multer
@@ -43,7 +44,7 @@ router.get("/all", async function (req, res, next) {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const categories = await Category.aggregate([
+    const products = await Product.aggregate([
       {
         $lookup: {
           from: 'foodtypes',          // The other collection name
@@ -51,16 +52,22 @@ router.get("/all", async function (req, res, next) {
           foreignField: 'foodType',   // Field from the 'orders' collection
           as: 'foodtypeDetails',         // Resulting array field to store matched data
         },
+        // $lookup: {
+        //     from: 'categoris',          // The other collection name
+        //     localField: '_id',        // Field from the 'users' collection
+        //     foreignField: 'category',   // Field from the 'orders' collection
+        //     as: 'categoryDetails',         // Resulting array field to store matched data
+        //   },
       }
     ]).sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
 
-    const totalCount = await Category.countDocuments({});
+    const totalCount = await Product.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);
 
     res.json({
-      data: categories,
+      data: products,
       meta: {
         totalRecords: totalCount,
         totalPages: totalPages,
@@ -82,14 +89,16 @@ router.post(
       if (!value) {
         throw new Error("Name is required");
       }
-      const existingCategories = await Category.findOne({ name: value });
-      if (existingCategories) {
+      const existingProducts = await Product.findOne({ name: value });
+      if (existingProducts) {
         throw new Error("Name must be unique");
       }
       return true;
     }),
     body("foodType").notEmpty().withMessage("Food Type is required"),
+    body("category").notEmpty().withMessage("Category is required"),
     body("position").notEmpty().withMessage("Position is required"),
+    body("price").notEmpty().withMessage("Price is required"),
     body("status").notEmpty().withMessage("Status is required").isIn(["active", "inactive"]).withMessage("Status must be 'active' or 'inactive'"),
   ],
   async function (req, res, next) {
@@ -98,31 +107,35 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, position, status, foodType, foodTypeName} = req.body;
+    const { name, type, position, price, status, category, categoryName, foodType, foodTypeName} = req.body;
     try {
 
       // File path for the original image
-      const imagePath = `/uploads/categories/${req.file.filename}`;
+      const imagePath = `/uploads/products/${req.file.filename}`;
     
       // Generate a thumbnail using Sharp
       const thumbnailFilename = `thumbnail-${req.file.filename}`;
-      const thumbnailPath = `/uploads/categories/thumbs/${thumbnailFilename}`;
+      const thumbnailPath = `/uploads/products/thumbs/${thumbnailFilename}`;
 
       // Create a thumbnail (e.g., 200x200 pixels)
       await sharp(req.file.path)
         .resize(100, 100)
-        .toFile(`./uploads/categories/thumbs/${thumbnailFilename}`);
+        .toFile(`./uploads/products/thumbs/${thumbnailFilename}`);
 
-      const categorie = await Category.create({
+      const product = await Product.create({
         name,
         position,
+        price,
+        type,
         foodType,
         foodTypeName,
+        category,
+        categoryName,
         image: req.file ? imagePath : null,
         thumbnail: thumbnailPath,
         status: status,
       });
-      res.json({ message: "Create successful", data: { _id: categorie._id, name: categorie.name } });
+      res.json({ message: "Create successful", data: { _id: product._id, name: product.name } });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

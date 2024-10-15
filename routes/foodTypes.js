@@ -1,9 +1,41 @@
 var express = require("express");
+const multer = require('multer');
+const path = require('path');
+const sharp = require('sharp');
 const { body, param, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 var router = express.Router();
 const { verifyToken } = require("../middlewares/authMiddleware");
 const FoodType = require("../models/foodType");
+
+
+// Set storage engine for multer
+const storage = multer.diskStorage({
+  destination: './uploads/', // Folder to save the uploaded files
+  filename: (req, file, cb) => {
+    // Generate a unique filename with the original extension
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+// Initialize upload middleware
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 3000000 }, // Limit file size to 1MB
+  fileFilter: (req, file, cb) => {
+    // Only allow image files (e.g., png, jpg, jpeg)
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only images (jpg, jpeg, png) are allowed!'));
+    }
+  },
+});
+
 
 router.get("/all", async function (req, res, next) {
   try {
@@ -36,7 +68,7 @@ router.get("/all", async function (req, res, next) {
 
 router.post(
   "/add",
-  
+  upload.single('image'),
   [
     body("name").custom(async (value, { req }) => {
       if (!value) {
@@ -48,8 +80,7 @@ router.post(
       }
       return true;
     }),
-    body("order").notEmpty().withMessage("Order is required"),
-    body("image").notEmpty().withMessage("Image is required"),
+    body("position").notEmpty().withMessage("Poisition is required"),
     body("status").notEmpty().withMessage("Status is required").isIn(["active", "inactive"]).withMessage("Status must be 'active' or 'inactive'"),
   ],
   async function (req, res, next) {
@@ -58,12 +89,28 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, order, status , image} = req.body;
+    const { name, position, status } = req.body;
     try {
+
+      
+      // File path for the original image
+      const imagePath = `/uploads/foodTypes/${req.file.filename}`;
+    
+      // Generate a thumbnail using Sharp
+      const thumbnailFilename = `thumbnail-${req.file.filename}`;
+      const thumbnailPath = `/uploads/foodTypes/thumbs/${thumbnailFilename}`;
+
+      // Create a thumbnail (e.g., 200x200 pixels)
+      await sharp(req.file.path)
+        .resize(100, 100)
+        .toFile(`./uploads/foodTypes/thumbs/${thumbnailFilename}`);
+
+
       const foodType = await FoodType.create({
         name,
-        order,
-        image,
+        position,
+        image: req.file ? imagePath : null,
+        thumbnail: thumbnailPath,
         status: status,
       });
       res.json({ message: "Create successful", data: { _id: foodType._id, name: foodType.name } });

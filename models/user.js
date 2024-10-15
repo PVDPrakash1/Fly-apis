@@ -1,16 +1,13 @@
 const mongoose = require("mongoose");
 
-const waiterSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     unique: true,
   },
-  phone: String,
   username: String,
   password:String,
-  image: String,
-  thumbnail: String,
   createdAt: {
     type: Date,
     default: Date.now,
@@ -22,11 +19,10 @@ const waiterSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["active", "inactive"],
-    default: "inactive",
+    default: "active",
   },
-
 });
 
-const Waiter = mongoose.model("Waiter", waiterSchema);
+const User = mongoose.model("User", userSchema);
 
-module.exports = Waiter;
+module.exports = User;

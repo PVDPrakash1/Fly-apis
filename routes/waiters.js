@@ -6,7 +6,7 @@ const { body, param, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 var router = express.Router();
 const { verifyToken } = require("../middlewares/authMiddleware");
-const Category = require("../models/Category");
+const Waiter = require("../models/waiter");
 
 // Set storage engine for multer
 const storage = multer.diskStorage({
@@ -43,24 +43,15 @@ router.get("/all", async function (req, res, next) {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const categories = await Category.aggregate([
-      {
-        $lookup: {
-          from: 'foodtypes',          // The other collection name
-          localField: '_id',        // Field from the 'users' collection
-          foreignField: 'foodType',   // Field from the 'orders' collection
-          as: 'foodtypeDetails',         // Resulting array field to store matched data
-        },
-      }
-    ]).sort({ createdAt: -1 })
+    const waiters = await Waiter.aggregate().sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
 
-    const totalCount = await Category.countDocuments({});
+    const totalCount = await Waiter.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);
 
     res.json({
-      data: categories,
+      data: waiters,
       meta: {
         totalRecords: totalCount,
         totalPages: totalPages,
@@ -82,14 +73,15 @@ router.post(
       if (!value) {
         throw new Error("Name is required");
       }
-      const existingCategories = await Category.findOne({ name: value });
+      const existingCategories = await Waiter.findOne({ name: value });
       if (existingCategories) {
         throw new Error("Name must be unique");
       }
       return true;
     }),
-    body("foodType").notEmpty().withMessage("Food Type is required"),
-    body("position").notEmpty().withMessage("Position is required"),
+    body("phone").notEmpty().withMessage("Phone is required"),
+    body("username").notEmpty().withMessage("Username is required"),
+    body("password").notEmpty().withMessage("Password is required"),
     body("status").notEmpty().withMessage("Status is required").isIn(["active", "inactive"]).withMessage("Status must be 'active' or 'inactive'"),
   ],
   async function (req, res, next) {
@@ -98,31 +90,31 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, position, status, foodType, foodTypeName} = req.body;
+    const { name, phone, username, password, status} = req.body;
     try {
 
       // File path for the original image
-      const imagePath = `/uploads/categories/${req.file.filename}`;
+      const imagePath = `/uploads/waiters/${req.file.filename}`;
     
       // Generate a thumbnail using Sharp
       const thumbnailFilename = `thumbnail-${req.file.filename}`;
-      const thumbnailPath = `/uploads/categories/thumbs/${thumbnailFilename}`;
+      const thumbnailPath = `/uploads/waiters/thumbs/${thumbnailFilename}`;
 
       // Create a thumbnail (e.g., 200x200 pixels)
       await sharp(req.file.path)
         .resize(100, 100)
-        .toFile(`./uploads/categories/thumbs/${thumbnailFilename}`);
+        .toFile(`./uploads/waiters/thumbs/${thumbnailFilename}`);
 
-      const categorie = await Category.create({
+      const waiter = await Waiter.create({
         name,
-        position,
-        foodType,
-        foodTypeName,
         image: req.file ? imagePath : null,
         thumbnail: thumbnailPath,
+        username: username,
+        password: password,
+        phone: phone,
         status: status,
       });
-      res.json({ message: "Create successful", data: { _id: categorie._id, name: categorie.name } });
+      res.json({ message: "Create successful", data: { _id: waiter._id, name: waiter.name } });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

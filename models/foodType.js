@@ -6,8 +6,9 @@ const foodTypeSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  order: Number,
-  photo: String,
+  position: Number,
+  image: String,
+  thumbnail: String,
   createdAt: {
     type: Date,
     default: Date.now,

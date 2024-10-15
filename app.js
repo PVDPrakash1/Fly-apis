@@ -8,12 +8,14 @@ require("dotenv").config();
 const cors = require("cors");
 
 var indexRouter = require("./routes/index");
+var authRouter = require("./routes/auth");
+var waiterRouter = require("./routes/waiters");
 var foodTypeRouter = require("./routes/foodTypes");
-var categoriesRouter = require("./routes/categories")
+var categoriesRouter = require("./routes/categories");
+var productsRouter = require("./routes/products");
 
 var app = express();
 const dotEnv = require('dotenv');
-const Category = require("./models/category");
 
 // Define the path to the .env file
 console.log(__dirname)
@@ -49,8 +51,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
+// Make the 'uploads' folder publicly accessible via '/uploads' URL
+app.use('/uploads', express.static('uploads'));
+app.use("/auth", authRouter);
+app.use("/waiters", waiterRouter);
 app.use("/foodTypes", foodTypeRouter);
-app.use("/categories", categoriesRouter)
+app.use("/categories", categoriesRouter);
+app.use("/products", productsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
