@@ -13,6 +13,10 @@ var waiterRouter = require("./routes/waiters");
 var foodTypeRouter = require("./routes/foodTypes");
 var categoriesRouter = require("./routes/categories");
 var productsRouter = require("./routes/products");
+var customersRouter = require("./routes/customers");
+var cartRouter = require("./routes/cart");
+var orderRouter = require("./routes/orders");
+var tableRouter = require("./routes/tables");
 
 var app = express();
 const dotEnv = require('dotenv');
@@ -58,6 +62,10 @@ app.use("/waiters", waiterRouter);
 app.use("/foodTypes", foodTypeRouter);
 app.use("/categories", categoriesRouter);
 app.use("/products", productsRouter);
+app.use("/customers", customersRouter);
+app.use("/cart", cartRouter);
+app.use("/orders", orderRouter);
+app.use("/tables", tableRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
