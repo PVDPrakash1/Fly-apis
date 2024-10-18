@@ -9,7 +9,8 @@ var path = require("path");
 
 var app = require('../app');
 var debug = require('debug')('dpt:server');
-var http = require('http');
+//var http = require('http');
+var https = require('https');
 
 const dotEnv = require('dotenv');
 
@@ -29,7 +30,18 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+// Load your SSL certificate and private key
+const options = {
+  key: fs.readFileSync('certs/bbc.key'), // Path to your private key
+  cert: fs.readFileSync('certs/bbc.crt'), // Path to your SSL certificate
+  ca: fs.readFileSync('certs/bbc.ca-bundle') // Path to your CA bundle (if applicable)
+};
+
+// Create HTTPS server
+const server = https.createServer(options, app);
+//var server = http.createServer(app);
+
+
 
 /**
  * Listen on provided port, on all network interfaces.
