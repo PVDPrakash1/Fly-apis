@@ -33,9 +33,9 @@ app.set('port', port);
 
 // Load your SSL certificate and private key
 const options = {
-  key: fs.readFileSync('certs/bbc.key'), // Path to your private key
-  cert: fs.readFileSync('certs/bbc.crt'), // Path to your SSL certificate
-  ca: fs.readFileSync('certs/bbc.ca-bundle') // Path to your CA bundle (if applicable)
+  key: fs.readFileSync('bin/certs/bbc.key'), // Path to your private key
+  cert: fs.readFileSync('bin/certs/bbc.crt'), // Path to your SSL certificate
+  ca: fs.readFileSync('bin/certs/bbc.ca-bundle') // Path to your CA bundle (if applicable)
 };
 
 // Create HTTPS server
