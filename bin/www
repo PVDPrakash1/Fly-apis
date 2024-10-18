@@ -4,6 +4,7 @@
  * Module dependencies.
  */
 require("dotenv").config();
+const fs = require('fs');
 
 var path = require("path");
 
