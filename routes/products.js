@@ -36,7 +36,15 @@ const upload = multer({
   },
 });
 
-
+router.get('/getByCategory/:categoryId', async (req, res) => {
+  const { categoryId } = req.params;
+  try {
+    const products = await Product.find({ category:categoryId });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
 
 router.get("/all", async function (req, res, next) {
   try {

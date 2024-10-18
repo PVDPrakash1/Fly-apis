@@ -45,8 +45,8 @@ router.get("/all", async function (req, res, next) {
 
     const foodTypes = await FoodType.find({})
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
+      // .skip(skip)
+      // .limit(limit)
 
     const totalCount = await FoodType.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);

@@ -74,6 +74,16 @@ router.get("/all", async function (req, res, next) {
   }
 });
 
+router.get('/getByFoodType/:foodTypeId', async (req, res) => {
+  const { foodTypeId } = req.params;
+  try {
+    const categories = await Category.find({ foodType:foodTypeId });
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 router.post(
   "/add",
   upload.single('image'),
