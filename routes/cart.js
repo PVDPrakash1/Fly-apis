@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Cart = require("../models/cart"); // Assuming you have a Cart model
 
-router.get('/live', async (req, res) => {
-    const cartItems = await Cart.find({  });
+router.get('/live/:tableNo/:phone', async (req, res) => {
+  const { tableNo, phone } = req.params;
+    const cartItems = await Cart.find({ tableNo, phone  });
   
     res.json({
       cartItems: cartItems,
@@ -12,7 +13,7 @@ router.get('/live', async (req, res) => {
 
 // Add to Cart Route
 router.post("/add", async (req, res) => {
-  const { tableNo, customerName, phone, productId, productName,  productDescription, price, action } = req.body;
+  const { tableNo, customerName, phone, productId, productName,  productImage, productDescription, price, action } = req.body;
 
   try {
     // Check if the item already exists in the cart
@@ -38,6 +39,7 @@ router.post("/add", async (req, res) => {
         phone,
         productId,
         productName,
+        productImage,
         productDescription,
         price,
         quantity:1,

@@ -10,8 +10,8 @@ var path = require("path");
 
 var app = require('../app');
 var debug = require('debug')('dpt:server');
-//var http = require('http');
-var https = require('https');
+var http = require('http');
+//var https = require('https');
 
 const dotEnv = require('dotenv');
 
@@ -39,8 +39,8 @@ const options = {
 };
 
 // Create HTTPS server
-const server = https.createServer(options, app);
-//var server = http.createServer(app);
+//const server = https.createServer(options, app);
+var server = http.createServer(app);
 
 
 

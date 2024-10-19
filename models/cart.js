@@ -6,6 +6,7 @@ const cartSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   productId: { type: String, required: true },
   productName: { type: String, required: true },
+  productImage: { type: String, required: true },
   productDescription: { type: String, required: false },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },

@@ -28,6 +28,7 @@ router.post("/placeOrder", async (req, res) => {
     const liveOrders = cartItems.map((item) => ({
       productId: item.productId,
       productName: item.productName,
+      productImage: item.productImage,
       productDescription: item.productDescription,
       price: item.price,
       quantity: item.quantity,
