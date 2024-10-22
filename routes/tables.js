@@ -105,7 +105,7 @@ router.post('/assign', async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
       }
   
-      const { tableNo, qrCodeUrl, status} = req.body;
+      const { tableNo, qrCodeUrl, capacity, status} = req.body;
       try {
   
         // File path for the original image
@@ -127,6 +127,7 @@ router.post('/assign', async (req, res) => {
           qrCodeImage: req.file ? imagePath : null,
           qrCodeThumbnail: thumbnailPath,
           status: status,
+          capacity: capacity,
         });
         res.json({ message: "Create successful", data: { _id: table._id, name: table.tableNo } });
       } catch (error) {
