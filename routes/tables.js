@@ -97,7 +97,7 @@ router.post('/assign', async (req, res) => {
         return true;
       }),
       body("qrCodeUrl").notEmpty().withMessage("qrCodeUrl is required"),
-      body("status").notEmpty().withMessage("Status is required").isIn(["active", "inactive"]).withMessage("Status must be 'active' or 'inactive'"),
+      body("status").notEmpty().withMessage("Status is required").isIn(['available', 'occupied', 'cleaning', 'reserved']).withMessage("Status must be 'active' or 'inactive'"),
     ],
     async function (req, res, next) {
       const errors = validationResult(req);
