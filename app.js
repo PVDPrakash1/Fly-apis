@@ -17,6 +17,8 @@ var customersRouter = require("./routes/customers");
 var cartRouter = require("./routes/cart");
 var orderRouter = require("./routes/orders");
 var tableRouter = require("./routes/tables");
+var kitchenRouter = require("./routes/kitchen");
+var barRouter = require("./routes/bar");
 
 var app = express();
 const dotEnv = require('dotenv');
@@ -59,6 +61,8 @@ app.use("/", indexRouter);
 app.use('/uploads', express.static('uploads'));
 app.use("/auth", authRouter);
 app.use("/waiters", waiterRouter);
+app.use("/kitchen", kitchenRouter);
+app.use("/bar", barRouter);
 app.use("/foodTypes", foodTypeRouter);
 app.use("/categories", categoriesRouter);
 app.use("/products", productsRouter);

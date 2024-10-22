@@ -1,16 +1,13 @@
 const mongoose = require("mongoose");
 
-const waiterSchema = new mongoose.Schema({
+const kitchenSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     unique: true,
   },
-  phone: String,
   username: String,
   password:String,
-  image: String,
-  thumbnail: String,
   createdAt: {
     type: Date,
     default: Date.now,
@@ -27,6 +24,6 @@ const waiterSchema = new mongoose.Schema({
 
 });
 
-const Waiter = mongoose.model("Waiter", waiterSchema);
+const Kitchen = mongoose.model("Kitchen", kitchenSchema);
 
-module.exports = Waiter;
+module.exports = Kitchen;

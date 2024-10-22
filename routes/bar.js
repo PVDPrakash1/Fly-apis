@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const { body, param, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 var router = express.Router();
-const Waiter = require("../models/waiter");
+const Bar = require("../models/bar");
 
 var Token = require("../models/token");
 
@@ -63,7 +63,7 @@ router.post("/login", async (req, res) => {
 
   try {
     console.log(username, password);
-    const user = await Waiter.findOne({ username });
+    const user = await Bar.findOne({ username });
     console.log(user);
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.json({ message: "Invalid Username or password" });
@@ -94,12 +94,12 @@ router.get("/all", async function (req, res, next) {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const waiters = await Waiter.aggregate()
+    const waiters = await Bar.aggregate()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalCount = await Waiter.countDocuments({});
+    const totalCount = await Bar.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);
 
     res.json({
@@ -125,13 +125,12 @@ router.post(
       if (!value) {
         throw new Error("Name is required");
       }
-      const existingCategories = await Waiter.findOne({ name: value });
+      const existingCategories = await Bar.findOne({ name: value });
       if (existingCategories) {
         throw new Error("Name must be unique");
       }
       return true;
     }),
-    body("phone").notEmpty().withMessage("Phone is required"),
     body("username").notEmpty().withMessage("Username is required"),
     body("password").notEmpty().withMessage("Password is required"),
     body("status")
@@ -146,7 +145,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, phone, username, password, status } = req.body;
+    const { name, username, password, status } = req.body;
     try {
       if (req.file && req.file.fieldname) {
         // File path for the original image
@@ -163,18 +162,15 @@ router.post(
       }
 
       const hashedPassword = bcrypt.hashSync(password, 8);
-      const waiter = await Waiter.create({
+      const bar = await Bar.create({
         name,
-        image: req.file ? imagePath : '',
-        thumbnail: req.file ? thumbnailPath : '',
         username: username,
         password: hashedPassword,
-        phone: phone,
         status: status,
       });
       res.json({
         message: "Create successful",
-        data: { _id: waiter._id, name: waiter.name },
+        data: { _id: bar._id, name: bar.name },
       });
     } catch (error) {
       res.status(500).json({ message: error.message });

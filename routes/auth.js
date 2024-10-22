@@ -51,7 +51,7 @@ router.post(
       const user = await User.findOne({ username });
       console.log(user);
       if (!user || !bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ message: "Invalid Username or password" });
+        return res.json({ message: "Invalid Username or password", data: null });
       }
 
       const token = jwt.sign({ username: username }, jwtSecretKey, { expiresIn: "1h" });

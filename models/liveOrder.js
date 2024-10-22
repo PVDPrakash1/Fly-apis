@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
+const liveOrderSchema = new mongoose.Schema({
   tableNo: { type: String, required: true },
   customerName: { type: String, required: true },
   phone: { type: String, required: true },
@@ -27,4 +27,4 @@ const orderSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('LiveOrder', liveOrderSchema);

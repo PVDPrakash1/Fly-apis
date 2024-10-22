@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
 
-const waiterSchema = new mongoose.Schema({
-  name: {
+const sessionSchema = new mongoose.Schema({
+  phone: {
     type: String,
     required: true,
     unique: true,
   },
-  phone: String,
-  username: String,
-  password:String,
-  image: String,
-  thumbnail: String,
+  name: String,
   createdAt: {
     type: Date,
     default: Date.now,
@@ -24,9 +20,8 @@ const waiterSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "active",
   },
-
 });
 
-const Waiter = mongoose.model("Waiter", waiterSchema);
+const Session = mongoose.model("Session", sessionSchema);
 
-module.exports = Waiter;
+module.exports = Session;

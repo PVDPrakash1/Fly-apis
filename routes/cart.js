@@ -13,7 +13,7 @@ router.get('/live/:tableNo/:phone', async (req, res) => {
 
 // Add to Cart Route
 router.post("/add", async (req, res) => {
-  const { tableNo, customerName, phone, productId, productName,  productImage, productDescription, price, action } = req.body;
+  const { tableNo, customerName, phone, productId, productName,  productImage, productDescription, foodType, price, action } = req.body;
 
   try {
     // Check if the item already exists in the cart
@@ -41,6 +41,7 @@ router.post("/add", async (req, res) => {
         productName,
         productImage,
         productDescription,
+        foodType,
         price,
         quantity:1,
       });

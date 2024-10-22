@@ -35,35 +35,52 @@ const storage = multer.diskStorage({
       }
     },
   });
-  
 
-// Fetch assigned and available tables
-router.get('/all', async (req, res) => {
-    try {
-      const assignedTables = await Table.find({ assignedTo: { $ne: null } }).populate('assignedTo');
-      const availableTables = await Table.find({ assignedTo: null });
-      res.json({ assignedTables, availableTables });
-    } catch (error) {
-      res.status(500).send('Server error');
-    }
+  router.get('/all', async (req, res) => {
+    const tables = await Table.find({  });
+    res.json({tables: tables});
   });
   
-  // Assign or unassign tables
-  router.post('/assign', async (req, res) => {
-    const { tableIds, waiterId } = req.body;
-  
-    try {
-      // Unassign tables that are not in tableIds
-      await Table.updateMany({ assignedTo: waiterId }, { assignedTo: null });
-  
-      // Assign new tables
-      await Table.updateMany({ _id: { $in: tableIds } }, { assignedTo: waiterId });
-  
-      res.json({ message: 'Tables updated successfully' });
-    } catch (error) {
-      res.status(500).send('Server error');
+// Fetch available tables
+router.get('/available', async (req, res) => {
+  const availableTables = await Table.find({ isAssigned: false });
+  res.json({availableTables: availableTables});
+});
+
+// Fetch assigned tables for a waiter
+router.get('/assigned/:waiterId', async (req, res) => {
+  const waiterId = req.params.waiterId;
+  const assignedTables = await Table.find({ assignedWaiter: waiterId });
+  res.json({assignedTables: assignedTables});
+});
+
+// Assign tables to waiter
+router.post('/assign', async (req, res) => {
+  try {
+    const { assignedTables, unassignedTables, waiterId } = req.body;
+
+    // Assign the tables
+    if (assignedTables && assignedTables.length > 0) {
+      await Table.updateMany(
+        { _id: { $in: assignedTables } },
+        { $set: { assignedWaiter: waiterId, isAssigned: true } }
+      );
     }
-  });
+
+    // Unassign the tables
+    if (unassignedTables && unassignedTables.length > 0) {
+      await Table.updateMany(
+        { _id: { $in: unassignedTables } },
+        { $set: { assignedWaiter: null, isAssigned: false } }
+      );
+    }
+
+    return res.status(200).json({ message: 'Tables updated successfully' });
+  } catch (error) {
+    console.error('Error updating tables:', error);
+    return res.status(500).json({ message: 'Error updating tables' });
+  }
+});
 
   router.post(
     "/add",
