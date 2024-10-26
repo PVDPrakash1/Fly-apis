@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
-var Session = require("../models/customer");
-var Customer = require("../models/session");
+var Customer = require("../models/customer");
+var Session = require("../models/session");
 const { verifyToken } = require("../middlewares/authMiddleware");
 
 router.get('/live', async (req, res) => {
@@ -49,17 +49,24 @@ router.post('/join-table', async (req, res) => {
     const { name, phone, table } = req.body;
 
     try {
+      console.log(phone);
         // Check if the user already exists in the table
-        const existingUser = await Customer.findOne({ phone });
+        const existingUser = await Customer.findOne(
+          { phone: phone });
 
-        if (!existingUser) {
+        console.log(existingUser);
+
+        if (existingUser === null) {
+          console.log("comets here");
           // Create a new user entry
           const newUser = new Customer({ name, phone });
           await newUser.save();
         }
 
         const existingSession = await Session.findOne({ phone, table });
-        if (!existingSession) {
+        console.log(existingSession);
+        if (existingSession === null) {
+          console.log("cometss here");
           const newSession = new Session({ name, phone, table });
           await newSession.save();
         }

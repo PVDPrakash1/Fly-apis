@@ -4,6 +4,7 @@
  * Module dependencies.
  */
 require("dotenv").config();
+const socketIo = require('socket.io');
 const fs = require('fs');
 
 var path = require("path");
@@ -12,20 +13,6 @@ var app = require('../app');
 var debug = require('debug')('dpt:server');
 //var http = require('http');
 var https = require('https');
-
-const dotEnv = require('dotenv');
-
-// Define the path to the .env file
-console.log(__dirname)
-const configFile = path.resolve(__dirname, `../.env.${process.env.NODE_ENV}`);
-const config = dotEnv.config({ path: configFile }).parsed;
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(config.PORT || '3000');
-app.set('port', port);
 
 /**
  * Create HTTP server.
@@ -43,6 +30,31 @@ const server = https.createServer(options, app);
 //var server = http.createServer(app);
 
 
+const io = socketIo(server, {
+  cors: {
+      origin: '*', // Your frontend URL
+      methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+});
+
+const dotEnv = require('dotenv');
+
+// Define the path to the .env file
+console.log(__dirname)
+const configFile = path.resolve(__dirname, `../.env.${process.env.NODE_ENV}`);
+const config = dotEnv.config({ path: configFile }).parsed;
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(config.PORT || '3000');
+app.set('port', port);
+app.set('socketio', io);
 
 /**
  * Listen on provided port, on all network interfaces.

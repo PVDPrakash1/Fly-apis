@@ -4,9 +4,9 @@ const sessionSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
   },
   name: String,
+  table: String,
   createdAt: {
     type: Date,
     default: Date.now,

@@ -6,6 +6,8 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 require("dotenv").config();
 const cors = require("cors");
+const { io } = require('./bin/www');
+
 
 var indexRouter = require("./routes/index");
 var authRouter = require("./routes/auth");
@@ -21,6 +23,8 @@ var kitchenRouter = require("./routes/kitchen");
 var barRouter = require("./routes/bar");
 
 var app = express();
+app.set('socketio', io);
+
 const dotEnv = require('dotenv');
 
 // Define the path to the .env file

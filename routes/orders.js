@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const socketIo = require('socket.io');
 const Order = require("../models/order"); // Assuming you have a Cart model
 const Cart = require("../models/cart");
 const LiveOrder = require("../models/liveOrder");
+
 
 router.get("/live/:tableNo/:phone", async (req, res) => {
   const { tableNo, phone } = req.params;
@@ -94,6 +96,15 @@ router.post("/placeOrder", async (req, res) => {
     }));
 
     await LiveOrder.insertMany(liveOrders);
+
+    var io = req.app.get('socketio');
+
+   
+   
+    io.emit('orderPlaced', {
+      message: `A new order has been placed!`,
+      orders: cartItems
+  });
 
     // Clear the cart
     await Cart.deleteMany({ tableNo });
