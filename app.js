@@ -21,6 +21,7 @@ var orderRouter = require("./routes/orders");
 var tableRouter = require("./routes/tables");
 var kitchenRouter = require("./routes/kitchen");
 var barRouter = require("./routes/bar");
+var billRouter = require("./routes/bill");
 
 var app = express();
 app.set('socketio', io);
@@ -74,6 +75,7 @@ app.use("/customers", customersRouter);
 app.use("/cart", cartRouter);
 app.use("/orders", orderRouter);
 app.use("/tables", tableRouter);
+app.use("/bill", billRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -92,3 +94,64 @@ app.use(function (err, req, res, next) {
 });
 
 module.exports = app;
+
+const escPosEncoder = require('esc-pos-encoder');
+const net = require('net');
+
+
+
+const printerIp = '192.168.1.1';  // Replace with your printer's IP
+const printerPort = 9100;           // Default port for many POS printers
+
+// Sample data to print
+const orderData = {
+  orderId: 12345,
+  table: 1,
+  customer: 'John Doe',
+  items: [
+    { name: 'Pizza', quantity: 2, price: 10 },
+    { name: 'Pasta', quantity: 1, price: 8 },
+  ],
+  total: 28,
+};
+
+const printer = new escPosEncoder();
+
+// Initialize TCP/IP connection to the printer
+const client = new net.Socket();
+client.connect(printerPort, printerIp, () => {
+  const buffer = printer.initialize();  // Initialize the printer
+  buffer.push(...printer.text(`Order #${orderData.orderId}\n`));
+  buffer.push(...printer.text(`Table ${orderData.table}\n`));
+  buffer.push(...printer.text(`Customer: ${orderData.customer}\n`));
+  buffer.push(...printer.text('Items:\n'));
+
+  orderData.items.forEach(item => {
+    buffer.push(...printer.text(`${item.name} x ${item.quantity} - $${item.price}\n`));
+  });
+
+  buffer.push(...printer.text(`Total: $${orderData.total}\n`));
+  buffer.push(...printer.cut());
+
+  // Send the buffer to the printer
+  client.write(Buffer.from(buffer));
+
+  // Listen for the printer's response to confirm success or failure
+  client.on('data', (data) => {
+    console.log('Printer response:', data.toString());
+    // Here you can check the response to determine whether it was successful
+    // or if there was an error (e.g., printer busy, out of paper, etc.)
+    if (data.includes('Success')) {
+      console.log('Print job successful');
+    } else {
+      console.log('Print job failed');
+    }
+  });
+
+  // Close the connection after sending the print job
+  client.end();
+});
+
+client.on('error', (err) => {
+  console.log('Connection error:', err);
+});

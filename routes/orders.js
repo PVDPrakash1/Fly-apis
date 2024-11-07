@@ -42,6 +42,15 @@ router.get("/liveorders/:tableNo", async (req, res) => {
   });
 });
 
+router.get("/finalorders/:tableNo", async (req, res) => {
+  const { tableNo } = req.params;
+  const orders = await LiveOrder.find({tableNo, foodType: { $in: ["paymentPending", "completed"]}});
+
+  res.json({
+    orders: orders,
+  });
+});
+
 router.put('/:orderId/status', async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body; // new status from request body
